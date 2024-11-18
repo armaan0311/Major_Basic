@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import './AboutUs.css';  // Create a separate CSS file for the styles
 
 const AboutUs = () => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -34,40 +35,69 @@ const AboutUs = () => {
         },
     ];
 
+    useEffect(() => {
+        // Trigger confetti when the page is loaded
+        const confetti = document.getElementById("confetti");
+        confetti.classList.add("active");
+    }, []);  // Run once on mount
+
     return (
-        <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', lineHeight: '1.6' }}>
-            <h1>About Us</h1>
-            <p>
-                Welcome to <strong>PrepTalk</strong>, your all-in-one platform for interview preparation and career advancement.
+        <div style={{ fontFamily: 'Arial, sans-serif', padding: '20px', backgroundColor: '#f9f9f9' }}>
+            {/* Confetti animation container */}
+            <div id="confetti" className="confetti"></div>
+
+            <h1 style={{
+                textAlign: 'center', color: '#3b3b3b', fontSize: '2.5rem', fontWeight: 'bold', letterSpacing: '1px',
+                position: 'relative'
+            }}>
+                About Us
+            </h1>
+            <p style={{
+                maxWidth: '800px', margin: '0 auto', textAlign: 'center', color: '#555', fontSize: '1.1rem', lineHeight: '1.8',
+                marginBottom: '30px', fontStyle: 'italic', letterSpacing: '0.5px'
+            }}>
+                Welcome to <strong style={{ color: '#FF69B4' }}>PrepTalk</strong>, your all-in-one platform for interview preparation and career advancement.
                 Whether you're a student preparing for your first interview or a professional looking to explore new opportunities, PrepTalk is here to support you.
                 Our platform offers a wide range of resources, including company-specific interview materials, personalized mentorship from experienced professionals,
                 and the latest job listings tailored to your field. Additionally, our AI-powered chatbot is ready to assist with your questions,
                 providing insights to help you stay on track. At PrepTalk, we’re committed to making your preparation journey seamless, efficient, and successful.
             </p>
-            
-            <h2 style={{ marginTop: '30px' }}>FAQs</h2>
-            <div style={{ marginTop: '15px' }}>
+
+            <h2 style={{
+                marginTop: '40px', color: '#3b3b3b', fontSize: '1.8rem', fontWeight: '600', letterSpacing: '1px',
+                textAlign: 'center', borderBottom: '2px solid #FF69B4', paddingBottom: '5px'
+            }}>
+                Frequently Asked Questions
+            </h2>
+
+            <div style={{ marginTop: '25px', maxWidth: '800px', margin: '0 auto' }}>
                 {faqs.map((faq, index) => (
                     <div
                         key={index}
                         style={{
-                            borderBottom: '1px solid #ddd',
-                            padding: '10px 0',
-                            cursor: 'pointer',
+                            borderBottom: '1px solid #ddd', padding: '15px 20px', cursor: 'pointer', borderRadius: '8px',
+                            backgroundColor: activeIndex === index ? '#FFE4E1' : 'transparent',
+                            transition: 'background-color 0.3s ease, transform 0.3s ease',
+                            transform: activeIndex === index ? 'scale(1.02)' : 'scale(1)',
+                            boxShadow: activeIndex === index ? '0 5px 15px rgba(0, 0, 0, 0.1)' : 'none',
                         }}
+                        onClick={() => toggleFAQ(index)}
                     >
                         <p
-                            onClick={() => toggleFAQ(index)}
                             style={{
-                                fontWeight: 'bold',
-                                color: '#333',
-                                marginBottom: '5px',
+                                fontWeight: 'bold', color: '#333', marginBottom: '8px', fontSize: '1.1rem',
+                                transition: 'color 0.3s ease', letterSpacing: '0.5px'
                             }}
                         >
                             {faq.question}
                         </p>
                         {activeIndex === index && (
-                            <p style={{ marginLeft: '20px', color: '#555' }}>{faq.answer}</p>
+                            <p style={{
+                                marginLeft: '20px', color: '#555', fontSize: '1rem', fontStyle: 'italic', lineHeight: '1.6',
+                                transition: 'opacity 0.3s ease', opacity: activeIndex === index ? 1 : 0
+                            }}>
+                                {faq.answer}
+                            </p>
                         )}
                     </div>
                 ))}

@@ -1,14 +1,163 @@
+/* General Profile Container */
 .mentor-profile {
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+  font-family: 'Lato', sans-serif; /* Modern font */
+  max-width: 800px; /* Reduce max-width for smaller profile container */
+  margin: 40px auto;
+  padding: 40px;
+  background-color: #f5f7fa; /* Soft gray background */
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Soft shadow for depth */
+  line-height: 1.75;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+  justify-content: center; /* Center vertically if content height is more */
+  text-align: center;
 }
 
-.mentor-profile h2 {
-  margin-top: 0;
+/* Profile Card - Smaller Size */
+.mentor-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 40px;
+  width: 80%; /* Reduce the width of the profile card */
+  max-width: 700px; /* Set a max width to make the card smaller */
 }
 
-.mentor-profile p {
+/* Profile Picture */
+.mentor-photo {
+  width: 100px; /* Smaller image size */
+  height: 100px;
+  border-radius: 50%; /* Circular photo */
+  object-fit: cover;
+  border: 5px solid #4CAF50; /* Green border */
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px; /* Smaller margin below image */
+}
+
+/* Mentor Info Section */
+.mentor-info {
+  margin-top: 20px;
+  color: #333;
+  width: 100%; /* Ensure info section takes full width */
+}
+
+h2 {
+  font-size: 30px; /* Slightly smaller font size for name */
+  font-weight: 700; /* Bold font */
+  color: #2c3e50; /* Darker blue */
   margin-bottom: 10px;
+  letter-spacing: 0.5px;
+  text-align: center; /* Center the name */
+}
+
+.mentor-position {
+  font-size: 18px; /* Slightly smaller size for position */
+  font-weight: 400;
+  font-style: italic;
+  color: #7f8c8d;
+  margin-top: 5px;
+  text-align: center;
+}
+
+.mentor-email {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px; /* Smaller email text */
+}
+
+.mentor-email:hover {
+  text-decoration: underline;
+}
+
+.bio {
+  margin-top: 20px;
+  font-size: 16px; /* Slightly smaller font size for biography */
+  color: #555;
+  line-height: 1.6;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  text-align: center; /* Center the biography text */
+}
+
+/* Collapsible Sections */
+.collapsible-section {
+  margin: 20px 0;
+  width: 100%;
+}
+
+/* Collapsible Button */
+.collapsible-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 20px; /* Smaller padding for collapsible buttons */
+  border: none;
+  border-radius: 8px;
+  font-size: 16px; /* Slightly smaller font size for collapsible buttons */
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.collapsible-button:hover {
+  background-color: #45a049;
+}
+
+/* Collapsible Content */
+.collapsible-content {
+  padding: 12px 0;
+  background-color: #ffffff;
+  border-left: 4px solid #4CAF50;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.collapsible-content ul {
+  list-style: none;
+  padding-left: 20px;
+}
+
+.collapsible-content ul li {
+  margin-bottom: 10px;
+  font-size: 14px; /* Smaller font size for list items */
+  font-weight: 400;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Contact Button */
+.contact-button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 20px; /* Smaller padding for the contact button */
+  border: none;
+  border-radius: 8px;
+  font-size: 16px; /* Smaller font size for contact button */
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+.contact-button:hover {
+  background-color: #0056b3;
+}
+
+.star-icon {
+  color: #f39c12;
+  margin-right: 5px;
+}
+
+/* Adding a subtle text-shadow for headings */
+h2, .mentor-position {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }

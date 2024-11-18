@@ -1,50 +1,69 @@
-/* MentorCard.css */
 .mentor-card {
   display: flex;
+  flex-direction: column; /* Align content vertically for better layout */
   align-items: center;
-  justify-content: flex-start;
-  padding: 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #fff;
-  margin-bottom: 16px;
-  max-width: 600px; /* Optional: Set a max width for better readability */
-} 
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #ffffff, #f9f9f9);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-bottom: 20px;
+  max-width: 600px;
+  cursor: pointer;
+}
+
+.mentor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
 
 .mentor-photo-container {
-  width: 33%; /* Image takes one-third of the card */
-  padding-right: 16px;
+  width: 100px;
+  height: 100px;
+  margin-bottom: 16px;
+  border: 3px solid #4caf50; /* Add a green border */
+  border-radius: 50%;
+  overflow: hidden;
   display: flex;
-  justify-content: center; /* Center the image horizontally */
-  align-items: center; /* Center the image vertically */
+  justify-content: center;
+  align-items: center;
+  background-color: #f1f1f1;
 }
 
 .mentor-photo {
-  width: 80px; /* Set a fixed width for the image */
-  height: 80px; /* Fixed height for the circular image */
-  border-radius: 50%; /* Make the image circular */
+  width: 100px; /* Fixed width */
+  height: 100px; /* Fixed height */
   object-fit: cover; /* Ensure the image fills the circle without distortion */
 }
 
 .mentor-info {
-  width: 67%; /* The remaining two-thirds of the card */
+  text-align: center;
+  margin-top: 8px;
 }
 
-.mentor-info h2 {
-  display: flex;
-  align-items: center;
-  font-size: 18px;
-  margin: 0;
+.mentor-name {
+  font-size: 22px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .mentor-info p {
+  font-size: 16px;
+  color: #555;
   margin: 4px 0;
 }
 
+.mentor-info p span {
+  font-weight: bold; /* Bold for the labels like 'Domain', 'Experience', etc. */
+}
+
 .availability-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
+  display: inline-block;
   margin-left: 8px;
 }
 
@@ -55,3 +74,4 @@
 .unavailable {
   background-color: #f44336; /* Red for unavailable */
 }
+

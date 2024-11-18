@@ -1,58 +1,201 @@
 [
   {
-    "name": "Shiri Agarwal",
-    "domain": "Business And Management",
-    "experience": 5,
-    "rating": 4.9,
-    "availability": true,
-    "photo": "teacher1.jpg", 
-    "description": "Shiri is an expert in business management with over 5 years of experience helping startups grow.",
-    "linkedin": "https://linkedin.com/in/shiriagarwal",
-    "twitter": "https://twitter.com/shiriagarwal",
-    "github": "https://github.com/shiriagarwal"
+    "name": "Shruti Gupta",
+    "position": "Assistant Professor (Senior Grade)",
+    "experience": 10,
+    "domain": "Machine Learning",
+    "photo": "teacher1.jpg",
+    "rating": 5.0,
+    "linkedin": "https://linkedin.com/in/simrankaur",
+    "twitter": "https://twitter.com/simrankaur",
+    "github": "https://github.com/simrankaur",
+    "email": "shruti.gupta@mail.jiit.ac.in",
+    "biography": "Professor Shruti Gupta is a dedicated academic at Jaypee Institute of Information Technology (JIIT), Noida. She teaches various subjects including DBMS, Data Structures, Software Development, and more. Her research interests are satellite image analysis, machine learning, and database management systems. Professor Gupta is known for her strong academic background and contributions to teaching and research.",
+    "education": {
+      "phd": {
+        "degree": "PhD in Computer Science",
+        "institution": "IIT Roorkee",
+        "year": 2017
+      },
+      "mtech": {
+        "degree": "M.Tech in Computer Science",
+        "institution": "Thapar University",
+        "year": 2012
+      },
+      "btech": {
+        "degree": "B.Tech in Computer Science",
+        "institution": "HNB Garhwal University",
+        "year": 2009
+      }
+    },
+    "work_experience": [
+      {
+        "role": "Assistant Professor (Senior Grade)",
+        "organization": "Jaypee Institute of Information Technology, Noida",
+        "duration": "2022 - present"
+      },
+      {
+        "role": "Assistant Professor",
+        "organization": "NIT Delhi",
+        "duration": "2020 - 2021"
+      },
+      {
+        "role": "Assistant Professor",
+        "organization": "IIT Roorkee",
+        "duration": "2012"
+      }
+    ],
+    "research_interests": [
+      "Satellite Image Analysis",
+      "Machine Learning",
+      "Database Management Systems (DBMS)"
+    ],
+    "publications": [
+      {
+        "title": "Satellite Image Analysis Using Deep Learning Techniques",
+        "journal": "SN Computer Science",
+        "year": 2023
+      },
+      {
+        "title": "Machine Learning Models for Satellite Image Classification",
+        "journal": "IEEE Geoscience and Remote Sensing Letters",
+        "year": 2017
+      }
+      
+
+    ]
+  },
+  
+  {
+    "name": "Anuradha Gupta",
+    "position": "Assistant Professor (Grade II)",
+    "email": "anuradha.surolia@jiit.ac.in",
+    "domain": "Artificial Intelligence",
+    "photo": "teacher2.jpeg",
+    "experience": 13,
+    "linkedin": "https://linkedin.com/in/simrankaur",
+    "twitter": "https://twitter.com/simrankaur",
+    "github": "https://github.com/simrankaur",
+    "rating": 5.0,
+    "biography": "Anuradha Surolia is an Assistant Professor at Jaypee Institute of Information Technology, Noida, with over 12 years of teaching experience. Her research interests include social network analysis, artificial intelligence, digital forensics, data mining, privacy, and security. She has published several research papers and is passionate about contributing to the academic community.",
+    "education": {
+      "phd": {
+        "degree": "PhD in Computer Science",
+        "institution": "Pursuing, Jaypee Institute of Information Technology, Noida",
+        "status": "In Progress"
+      },
+      "mtech": {
+        "degree": "M.Tech in Computer Science",
+        "institution": "Indraprastha Institute of Information Technology, Delhi",
+        "year": 2013
+      },
+      "btech": {
+        "degree": "B.Tech in Computer Science",
+        "institution": "Punjab Technical University",
+        "year": 2010
+      }
+    },
+    "work_experience": [
+      {
+        "role": "Assistant Professor (Grade II)",
+        "organization": "Jaypee Institute of Information Technology, Noida",
+        "duration": "2015 - present"
+      },
+      {
+        "role": "Lecturer",
+        "organization": "Various Institutions",
+        "duration": "12+ years"
+      }
+    ],
+    "research_interests": [
+      "Social Network Analysis",
+      "Artificial Intelligence",
+      "Digital Forensics",
+      "Data Mining",
+      "Privacy and Security"
+    ],
+    "publications": [
+      {
+        "title": "Automatic Stance Detection for Twitter Data",
+        "journal": "Journal of Artificial Intelligence Research",
+        "year": 2021
+      },
+      {
+        "title": "Analyzing Indicators of Compromises for Ransomware",
+        "journal": "International Journal of Digital Security",
+        "year": 2020
+      }
+    ]
   },
   {
-    "name": "Shubham Kumar",
-    "domain": "Software Development",
-    "experience": 4,
-    "rating": 4.8,
-    "availability": false,
-    "photo": "teacher4.jpg",
-    "description": "Shubham specializes in full-stack development and has worked with various technologies.",
-    "linkedin": "https://linkedin.com/in/shubhamkumar",
-    "twitter": "https://twitter.com/shubhamkumar",
-    "github": "https://github.com/shubhamkumar"
-  },
-  {
-    "name": "Aisha Verma",
-    "domain": "Data Science",
-    "experience": 3,
-    "rating": 4.7,
-    "availability": true,
-    "photo": "teacher2.jpg",
-    "description": "Aisha has a strong background in data analysis and machine learning.",
-    "linkedin": "https://linkedin.com/in/aishaverma",
-    "twitter": "https://twitter.com/aishaverma",
-    "github": "https://github.com/aishaverma"
-  },
-  {
-    "name": "Vidhya Sharma",
-    "domain": "Software Engineering",
-    "experience": 4,
-    "rating": 4.6,
-    "availability": true,
-    "photo": "teacher11.jpg",
-    "description": "Vidhya is a software engineer with experience in both front-end and back-end technologies.",
-    "linkedin": "https://linkedin.com/in/vidhyasharma",
-    "twitter": "https://twitter.com/vidhyasharma",
-    "github": "https://github.com/vidhyasharma"
+    "name": "Pankaj Mishra",
+    "position": "Assistant Professor (Grade II)",
+    "experience": 12,
+    "domain": "Computer Network",
+    "photo": "teacher3.jpg",
+    "linkedin": "https://linkedin.com/in/simrankaur",
+    "twitter": "https://twitter.com/simrankaur",
+    "github": "https://github.com/simrankaur",
+    "rating": 5.0,
+    "email": "pankaj.mishra@mail.jiit.ac.in",
+    "biography": "Pankaj Mishra is an Assistant Professor at Jaypee Institute of Information Technology (JIIT), Noida. His expertise is in computer networks, operating systems, and software engineering. He has over 7 years of experience in academia and is passionate about making complex concepts easier for students. His research focuses on improving computer networks and software systems.",
+    "education": {
+      "phd": {
+        "degree": "Pursuing PhD",
+        "institution": "Jaypee Institute of Information Technology, Noida",
+        "status": "In Progress"
+      },
+      "mtech": {
+        "degree": "M.Tech in Computer Science",
+        "institution": "BBAU Lucknow",
+        "year": 2014
+      },
+      "btech": {
+        "degree": "B.Tech in Computer Science",
+        "institution": "GBTU Lucknow",
+        "year": 2011
+      }
+    },
+    "work_experience": [
+      {
+        "role": "Assistant Professor (Grade II)",
+        "organization": "Jaypee Institute of Information Technology, Noida",
+        "duration": "2023 - present"
+      },
+      {
+        "role": "Assistant Professor",
+        "organization": "NIT Delhi",
+        "duration": "2020 - 2021"
+      },
+      {
+        "role": "Lecturer",
+        "organization": "Various Institutions",
+        "duration": "7.5+ years"
+      }
+    ],
+    "research_interests": [
+      "Computer Networks",
+      "Operating Systems",
+      "Software Engineering"
+    ],
+    "publications": [
+      {
+        "title": "Biometric Approach for Confidentiality in Cloud Computing",
+        "journal": "International Journal of Cloud Computing",
+        "year": 2022
+      },
+      {
+        "title": "Energy Efficient Routing in Wireless Sensor Network",
+        "journal": "Wireless Networks Journal",
+        "year": 2021
+      }
+    ]
   },
   {
     "name": "Ravi Sharma",
     "domain": "Artificial Intelligence",
     "experience": 6,
     "rating": 4.9,
-    "availability": true,
     "photo": "teacher5.jpg",
     "description": "Ravi is an AI expert with over 6 years of experience building intelligent systems and algorithms.",
     "linkedin": "https://linkedin.com/in/ravisharma",
@@ -64,7 +207,6 @@
     "domain": "Cybersecurity",
     "experience": 4,
     "rating": 4.6,
-    "availability": false,
     "photo": "teacher6.jpg",
     "description": "Neha specializes in network security and has worked with Fortune 500 companies to secure their data.",
     "linkedin": "https://linkedin.com/in/nehapatel",
@@ -76,7 +218,6 @@
     "domain": "Cloud Computing",
     "experience": 5,
     "rating": 4.8,
-    "availability": true,
     "photo": "teacher7.jpg",
     "description": "Ankit has expertise in cloud technologies, having worked with AWS and Azure for over 5 years.",
     "linkedin": "https://linkedin.com/in/ankitsingh",
@@ -88,7 +229,6 @@
     "domain": "Mobile App Development",
     "experience": 4,
     "rating": 4.5,
-    "availability": true,
     "photo": "teacher8.jpg",
     "description": "Priya is a mobile app developer with a passion for creating smooth, user-friendly apps for iOS and Android.",
     "linkedin": "https://linkedin.com/in/priyasoni",
@@ -100,7 +240,6 @@
     "domain": "Product Management",
     "experience": 7,
     "rating": 5.0,
-    "availability": true,
     "photo": "teacher9.jpg",
     "description": "Vikram has been a product manager for over 7 years, specializing in building and scaling successful products.",
     "linkedin": "https://linkedin.com/in/vikramehra",
@@ -112,7 +251,6 @@
     "domain": "Digital Marketing",
     "experience": 5,
     "rating": 4.7,
-    "availability": false,
     "photo": "teacher10.jpg",
     "description": "Simran has worked with various brands in optimizing their digital presence through social media and SEO strategies.",
     "linkedin": "https://linkedin.com/in/simrankaur",

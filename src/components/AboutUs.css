@@ -1,0 +1,60 @@
+/* Confetti effect styles */
+.confetti {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+}
+
+.confetti.active {
+    display: block;
+    animation: confettiFall 3s ease-in-out infinite;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100%);
+    }
+    50% {
+        transform: translateY(50%) rotate(90deg);
+    }
+    100% {
+        transform: translateY(100%) rotate(180deg);
+    }
+}
+
+.confetti::before,
+.confetti::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #FF69B4;
+    border-radius: 50%;
+    animation: confettiAnimation 1.5s linear infinite;
+}
+
+.confetti::before {
+    left: 10%;
+    animation-duration: 2s;
+}
+
+.confetti::after {
+    left: 90%;
+    animation-duration: 2.5s;
+}
+
+@keyframes confettiAnimation {
+    0% {
+        top: 0;
+        left: 0;
+    }
+    100% {
+        top: 100%;
+        left: 100%;
+    }
+}

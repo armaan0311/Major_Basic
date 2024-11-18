@@ -4,7 +4,7 @@ import Card from './Card';
 const Newsapp = () => {
     const [search, setSearch] = useState("Job Openings"); // Default search term for Job Openings
     const [newsData, setNewsData] = useState(null);
-    const API_KEY = "9c3ed8ee95884dec979460a60f96675b";
+    const API_KEY = "49a55d1778a947b98984e2e8991465a2";
 
     const getData = async () => {
         try {
