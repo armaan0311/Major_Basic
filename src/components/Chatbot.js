@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './Chatbot.css';
 
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'http://localhost:5001';
 
 function Chatbot() {
     const [conversation, setConversation] = useState([]);
@@ -10,11 +10,25 @@ function Chatbot() {
     const [roles, setRoles] = useState([]);
     const [selectedCompany, setSelectedCompany] = useState('');
     const [selectedRole, setSelectedRole] = useState('');
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(2);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [questions, setQuestions] = useState([]);
     const [interviewStarted, setInterviewStarted] = useState(false);
+    const [waitingForFollowUp, setWaitingForFollowUp] = useState(false);
     const mediaRecorder = useRef(null);
     const audioChunks = useRef([]);
+    const chatWindowRef = useRef(null);
+    const [isFollowUp, setIsFollowUp] = useState(false);
+
+    const scrollToBottom = useCallback(() => {
+        if (chatWindowRef.current) {
+            chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+        }
+    }, []);
+
+    const updateConversation = useCallback((message, isUser) => {
+        setConversation(prevConversation => [...prevConversation, { text: message, user: isUser }]);
+        setTimeout(scrollToBottom, 100);
+    }, [scrollToBottom]);
 
     useEffect(() => {
         const fetchCompanies = async () => {
@@ -57,13 +71,14 @@ function Chatbot() {
 
     useEffect(() => {
         if (interviewStarted && currentQuestionIndex < questions.length) {
-            updateConversation(questions[currentQuestionIndex], false);
-            startRecording();
+            if (!isFollowUp) {
+                updateConversation(questions[currentQuestionIndex], false);
+            }
         } else if (interviewStarted && currentQuestionIndex >= questions.length) {
             updateConversation("Thank you for your time. I hope this preparation helps you in your interview. Good luck!", false);
             setInterviewStarted(false);
         }
-    }, [currentQuestionIndex, questions, interviewStarted]);
+    }, [currentQuestionIndex, questions, interviewStarted, isFollowUp, updateConversation]);
 
     const handleCompanyChange = (event) => {
         setSelectedCompany(event.target.value);
@@ -72,10 +87,6 @@ function Chatbot() {
 
     const handleRoleChange = (event) => {
         setSelectedRole(event.target.value);
-    };
-
-    const updateConversation = (message, isUser) => {
-        setConversation(prevConversation => [...prevConversation, { text: message, user: isUser }]);
     };
 
     const apiRequest = async (endpoint, data) => {
@@ -123,6 +134,13 @@ function Chatbot() {
                 console.error('Error accessing microphone:', error);
                 updateConversation('Error accessing microphone.', false);
             });
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
+            mediaRecorder.current.stop();
+            setRecording(false);
+        }
     };
 
     const convertToWav = (webmBlob) => {
@@ -216,39 +234,41 @@ function Chatbot() {
     } catch (error) {
         console.error('Error recognizing speech:', error);
         updateConversation('Error recognizing speech. Please try again.', false);
-        startRecording(); // Retry recording
-    }
-};
-
-const stopRecording = () => {
-    if (mediaRecorder.current && mediaRecorder.current.state === "recording") {
-        mediaRecorder.current.stop();
-        setRecording(false);
     }
 };
 
 const handleAnswer = async (answer) => {
-    const currentQuestion = questions[currentQuestionIndex];
+        const currentQuestion = questions[currentQuestionIndex];
 
+        try {
+            const analysis = await apiRequest('/api/analyze', { question: currentQuestion, answer });
+            updateConversation(analysis.analysis, false);
+
+            const suggestions = await apiRequest('/api/suggestions', { question: currentQuestion, answer });
+            updateConversation("Suggestions: " + suggestions.suggestions.join('\n'), false);
+
+            if (!isFollowUp) {
+                const followUp = await apiRequest('/api/followup', { question: currentQuestion, answer });
+                updateConversation(followUp.followup, false);
+                setIsFollowUp(true);
+            } else {
+                setIsFollowUp(false);
+                setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+            }
+        } catch (error) {
+            console.error('Error processing answer:', error);
+            updateConversation('Error processing answer. Please try again.', false);
+        }
+    };
+
+const handleFollowUpAnswer = async (followUpAnswer) => {
     try {
-        const analysis = await apiRequest('/api/analyze', { question: currentQuestion, answer });
-        updateConversation(analysis.analysis, false);
-
-        const suggestions = await apiRequest('/api/suggestions', { question: currentQuestion, answer });
-        updateConversation("Suggestions: " + suggestions.suggestions.join('\n'), false);
-
-        const followUp = await apiRequest('/api/followup', { question: currentQuestion, answer });
-        updateConversation(followUp.followup, false);
-
-        // Start recording for follow-up answer
-        startRecording();
-
-        // After follow-up, move to next question
+        await handleAnswer(followUpAnswer);
+        setWaitingForFollowUp(false);
         setCurrentQuestionIndex(prevIndex => prevIndex + 1);
     } catch (error) {
-        console.error('Error processing answer:', error);
-        updateConversation('Error processing answer. Please try again.', false);
-        startRecording(); // Retry recording
+        console.error('Error processing follow-up answer:', error);
+        updateConversation('Error processing follow-up answer. Please try again.', false);
     }
 };
 
@@ -269,9 +289,9 @@ const handleStart = async () => {
         setQuestions(data.questions);
         updateConversation(data.summary, false);
         setInterviewStarted(true);
-        setCurrentQuestionIndex(0);  // Start from the third question (index 2)
-        updateConversation(data.questions[0], false);
-        startRecording();
+        setCurrentQuestionIndex(0);
+        setIsFollowUp(false);
+        //updateConversation(data.questions[0], false);
     } catch (error) {
         console.error('Error starting the interview:', error);
         updateConversation('Error starting the interview. Please try again.', false);
@@ -280,49 +300,73 @@ const handleStart = async () => {
 
 return (
     <div className="chatbot-container">
-        <h1>PrepAI Chatbot</h1>
-        <div id="conversation">
+        <h1>PrepAI Interview Simulator</h1>
+        <div className="chat-window" ref={chatWindowRef}>
             {conversation.map((msg, index) => (
                 <div key={index} className={`message ${msg.user ? 'user-message' : 'ai-message'}`}>
-                    {msg.text}
+                    <strong>{msg.user ? 'You:' : 'Interviewer:'}</strong>
+                    <p>{msg.text}</p>
                 </div>
             ))}
         </div>
         <div className="controls">
-            <div className="dropdown-group">
-                <label htmlFor="companySelect">Select Company:</label>
-                <select
-                    id="companySelect"
-                    value={selectedCompany}
-                    onChange={handleCompanyChange}
-                >
-                    <option value="">Select</option>
-                    {companies.map((company) => (
-                        <option key={company} value={company}>{company}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="dropdown-group">
-                <label htmlFor="roleSelect">Select Job Role:</label>
-                <select
-                    id="roleSelect"
-                    value={selectedRole}
-                    onChange={handleRoleChange}
-                >
-                    <option value="">Select</option>
-                    {roles.map((role) => (
-                        <option key={role} value={role}>{role}</option>
-                    ))}
-                </select>
-            </div>
             {!interviewStarted ? (
-                <button onClick={handleStart}>Start Interview</button>
+                <>
+                    <div className="dropdown-group">
+                        <label htmlFor="companySelect">Select Company:</label>
+                        <select
+                            id="companySelect"
+                            value={selectedCompany}
+                            onChange={handleCompanyChange}
+                        >
+                            <option value="">Select</option>
+                            {companies.map((company) => (
+                                <option key={company} value={company}>{company}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="dropdown-group">
+                        <label htmlFor="roleSelect">Select Job Role:</label>
+                        <select
+                            id="roleSelect"
+                            value={selectedRole}
+                            onChange={handleRoleChange}
+                        >
+                            <option value="">Select</option>
+                            {roles.map((role) => (
+                                <option key={role} value={role}>{role}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <button onClick={handleStart}>Start Interview</button>
+                </>
             ) : (
-                <button onClick={stopRecording} disabled={!recording}>
-                    {recording ? 'Stop Recording' : 'Waiting...'}
-                </button>
+                <div className="recording-controls">
+                    <button onClick={startRecording} disabled={recording}>
+                        Start Recording
+                    </button>
+                    <button onClick={stopRecording} disabled={!recording}>
+                        Stop Recording
+                    </button>
+                    {recording && <span className="recording-indicator">Recording...</span>}
+                </div>
             )}
         </div>
+        {!interviewStarted && (
+            <div className="instructions">
+                <h2>Instructions:</h2>
+                <ol>
+                    <li>Select a company and job role from the dropdowns.</li>
+                    <li>Click 'Start Interview' to begin the simulation.</li>
+                    <li>Read the interviewer's question carefully.</li>
+                    <li>Click 'Start Recording' and speak your answer.</li>
+                    <li>Click 'Stop Recording' when you've finished speaking.</li>
+                    <li>Wait for the AI to process your answer and provide feedback.</li>
+                    <li>Continue with follow-up questions as prompted.</li>
+                </ol>
+                <p>Good luck with your interview preparation!</p>
+            </div>
+        )}
     </div>
 );
 }

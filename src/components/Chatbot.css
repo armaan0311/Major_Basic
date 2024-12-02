@@ -16,7 +16,7 @@ h1 {
   text-align: center;
 }
 
-#conversation {
+.chat-window {
   height: 400px;
   overflow-y: auto;
   padding: 20px;
@@ -28,6 +28,7 @@ h1 {
   padding: 10px;
   border-radius: 5px;
   max-width: 80%;
+  animation: fadeIn 0.5s ease;
 }
 
 .user-message {
@@ -38,6 +39,16 @@ h1 {
 
 .ai-message {
   background-color: #f0f0f0;
+}
+
+.question {
+  font-weight: bold;
+  color: #0066cc;
+}
+
+.analysis, .suggestions, .follow-up {
+  margin-top: 5px;
+  font-style: italic;
 }
 
 .controls {
@@ -84,25 +95,45 @@ button:disabled {
   cursor: not-allowed;
 }
 
-input[type="text"] {
-  flex-grow: 1;
+.recording-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.recording-indicator {
+  color: #ff0000;
+  font-weight: bold;
+  animation: blink 1s infinite;
+}
+
+.instructions {
+  background-color: #e9ecef;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 5px;
+}
+
+.instructions h2 {
+  margin-top: 0;
+  color: #4a90e2;
 }
 
 /* Scrollbar Styles */
-#conversation::-webkit-scrollbar {
+.chat-window::-webkit-scrollbar {
   width: 8px;
 }
 
-#conversation::-webkit-scrollbar-track {
+.chat-window::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
 
-#conversation::-webkit-scrollbar-thumb {
+.chat-window::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
 
-#conversation::-webkit-scrollbar-thumb:hover {
+.chat-window::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 
@@ -122,12 +153,14 @@ input[type="text"] {
   }
 }
 
-/* Animation for new messages */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.message {
-  animation: fadeIn 0.5s ease;
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
 }

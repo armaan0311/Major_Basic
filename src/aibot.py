@@ -12,7 +12,7 @@ os.environ['API_KEY'] = 'AIzaSyDoz5h8MqTnuwqE-HDzTZAC5hSawTEfrFg'
 genai.configure(api_key=os.getenv('API_KEY'))
 
 app = Flask(__name__)
-CORS(app)
+CORS(app,resources={r"/api/*": {"origins": "http://localhost:3001"}})
 
 ex_data = pd.read_csv('IE Extracted (2).csv')
 
@@ -23,9 +23,9 @@ def summarize_text(company, role, text):
     Role: {role}
 
     Format the summary as follows:
-    - Interview Highlights: Key points of the interview.
-    - Pros: Positive aspects of the interview experience.
-    - Cons: Negative aspects of the interview experience.
+    - Interview Highlights: Key points of the interview.(20  words)
+    - Pros: Positive aspects of the interview experience.(20  words)
+    - Cons: Negative aspects of the interview experience.(20  words)
 
     Text: {text}
     """
@@ -36,7 +36,7 @@ def summarize_text(company, role, text):
 def generate_questions(summary, num_questions=3):
     prompt = f"""
     Based on the following interview summary, generate {num_questions} personality-based
-    questions that could be asked in an interview:
+    questions that could be asked in an interview (only questions):
 
     {summary}
     """
@@ -50,7 +50,7 @@ def analyze_answer(answer_text):
     {answer_text}
 
     Provide:
-    - Overall Evaluation: A short assessment of the answer.
+    - Overall Evaluation: A short assessment of the answer.(20-30 words)
     """
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content([prompt])
@@ -59,7 +59,7 @@ def analyze_answer(answer_text):
 def generate_follow_up(question, answer_text):
     prompt = f"""
     Based on the interview question and the candidate's answer,
-    generate a relevant follow-up question:
+    generate a relevant follow-up question(20-30 words):
 
     Question: {question}
     Answer: {answer_text}
@@ -72,7 +72,7 @@ def generate_suggestions(question, answer_text):
     prompt = f"""
     Based on the interview question and the candidate's answer,
     provide specific suggestions on how the candidate could improve
-    their answer:
+    their answer(20-30 words):
 
     Question: {question}
     Answer: {answer_text}
@@ -106,23 +106,27 @@ def get_roles():
 @app.route("/api/start", methods=["POST"])
 def start_interview():
     data = request.get_json()
+    print("Received data for start_interview:", data)  # Log received data
     company = data.get("company")
     role = data.get("role")
 
     if not all([company, role]):
-        return jsonify({"error": "Missing company or role"}), 400
+        print(f"Missing data: company={company}, role={role}")  # Log missing data
+        return jsonify({"error": f"Missing company or role. Received: company={company}, role={role}"}), 400
 
     try:
         extracted_text = ex_data[
             (ex_data["company"] == company) & (ex_data["role"] == role)
         ]["extracted_text"].values[0]
     except IndexError:
-        return jsonify({"error": "No matching interview text found"}), 400
+        print(f"No matching interview text found for company={company}, role={role}")  # Log when no match is found
+        return jsonify({"error": f"No matching interview text found for company={company}, role={role}"}), 400
 
     summary = summarize_text(company, role, extracted_text)
     questions = generate_questions(summary)
-    questions = [q for q in questions[2:] if q != '']
-    
+    questions = [q for q in questions[0:] if q != '']
+    print("Generated questions:", questions)
+    #print(f"Generated {len(questions)} questions for {company}, {role}")  # Log number of questions generated
     return jsonify({"summary": summary, "questions": questions})
 
 @app.route('/api/analyze', methods=['POST'])
@@ -192,4 +196,4 @@ def recognize():
         return jsonify({'error': 'An unexpected error occurred'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)
