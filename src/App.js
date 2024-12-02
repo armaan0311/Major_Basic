@@ -7,6 +7,7 @@ import InterviewPreparation from './components/InterviewPreparation';
 import AboutUs from './components/AboutUs';
 import mentorsData from './components/mentorsData.json';
 import Newsapp from './components/Newsapp';
+import Chatbot from './components/Chatbot';
 import './App.css';
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
             }
           />
           <Route path="/news" element={<Newsapp />} />
+          <Route path="/chatbot" element={<Chatbot />} />
           <Route path="/interview-preparation" element={<InterviewPreparation />} />
           <Route path="/AboutUs" element={<AboutUs />} />
         </Routes>

@@ -30,6 +30,9 @@ const Navbar = ({ onLogout }) => {
           <Link to="/">Mentorships</Link>
         </li>
         <li>
+          <Link to="/chatbot">PrepAI</Link>
+        </li>
+        <li>
           <Link to="/AboutUs">About</Link>
         </li>
       </ul>
