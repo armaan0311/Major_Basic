@@ -1,11 +1,12 @@
 .chatbot-container {
-  max-width: 800px;
+  max-width: 1100px; /* Increased width to fit chat and video side by side */
   margin: 20px auto;
   font-family: Arial, sans-serif;
   background-color: #f0f4f8;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  padding: 20px;
 }
 
 h1 {
@@ -14,15 +15,58 @@ h1 {
   padding: 20px;
   margin: 0;
   text-align: center;
+  border-radius: 10px 10px 0 0;
 }
 
+/* Main Layout */
+.chat-interface {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Chat Window */
 .chat-window {
-  height: 400px;
+  flex: 3; /* Takes most of the space */
+  height: 450px;
   overflow-y: auto;
+  border: 2px solid #ddd;
   padding: 20px;
   background-color: white;
+  border-radius: 10px;
 }
 
+/* Video Analysis Section */
+.video-analysis-container {
+  flex: 1; /* Smaller than chat window */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video-analysis {
+  width: 280px;
+  text-align: center;
+  border: 4px solid green; /* Default border */
+  padding: 10px;
+  background: #f1f1f1;
+  border-radius: 10px;
+  transition: border 0.3s ease; /* Smooth transition when changing colors */
+}
+
+.video-analysis img {
+  margin-top: 10px;
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Red border when looking away */
+.looking-away {
+  border-color: red !important;
+}
+
+/* Chat Messages */
 .message {
   margin-bottom: 15px;
   padding: 10px;
@@ -46,11 +90,14 @@ h1 {
   color: #0066cc;
 }
 
-.analysis, .suggestions, .follow-up {
+.analysis,
+.suggestions,
+.follow-up {
   margin-top: 5px;
   font-style: italic;
 }
 
+/* Controls Section */
 .controls {
   padding: 20px;
   background-color: #e9ecef;
@@ -70,7 +117,9 @@ label {
   font-weight: bold;
 }
 
-select, input[type="text"], button {
+select,
+input[type="text"],
+button {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -95,28 +144,19 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.recording-controls {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.recording-indicator {
-  color: #ff0000;
-  font-weight: bold;
-  animation: blink 1s infinite;
-}
-
-.instructions {
-  background-color: #e9ecef;
-  padding: 15px;
-  margin-top: 20px;
+/* Interview Start Button */
+.start-button {
+  padding: 10px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
   border-radius: 5px;
 }
 
-.instructions h2 {
-  margin-top: 0;
-  color: #4a90e2;
+.start-button:hover {
+  background-color: #357abd;
 }
 
 /* Scrollbar Styles */
@@ -137,30 +177,62 @@ button:disabled {
   background: #555;
 }
 
+.avatar-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-video {
+  border-radius: 12px;
+  border: 2px solid #ccc;
+}
+
+
+
 /* Responsive Design */
-@media (max-width: 600px) {
+@media (max-width: 800px) {
   .chatbot-container {
     margin: 10px;
     border-radius: 0;
   }
 
-  .controls {
+  .chat-interface {
     flex-direction: column;
+    align-items: center;
   }
 
-  .dropdown-group {
+  .chat-window {
     width: 100%;
+  }
+
+  .video-analysis-container {
+    width: 100%;
+    align-items: center;
+    margin-top: 20px;
   }
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes blink {
-  0% { opacity: 1; }
-  50% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

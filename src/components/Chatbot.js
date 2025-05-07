@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+
 import './Chatbot.css';
+import io from "socket.io-client";
+
+import StreamingAvatar, { AvatarQuality, StreamingEvents, TaskType, TaskMode } from '@heygen/streaming-avatar';
 
 const API_BASE_URL = 'http://localhost:5001';
+const socket = io(API_BASE_URL);
 
 function Chatbot() {
     const [conversation, setConversation] = useState([]);
@@ -19,6 +24,100 @@ function Chatbot() {
     const chatWindowRef = useRef(null);
     const [isFollowUp, setIsFollowUp] = useState(false);
 
+    const [videoSrc, setVideoSrc] = useState("");
+    const [lookingAway, setLookingAway] = useState(false);  // For displaying processed video
+    const [attentionScore, setAttentionScore] = useState(100);
+    const [emotion, setEmotion] = useState("neutral");
+    const [borderColor, setBorderColor] = useState("green");
+    const [gazeDirection, setGazeDirection] = useState("center");
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+
+    const avatarRef = useRef(null);
+    const avatarVideoRef = useRef(null);
+
+      // holds an array of { question, answer, followUpQuestion?, followUpAnswer? }
+    const [interviewData, setInterviewData] = useState([]);
+    const [currentMetrics, setCurrentMetrics] = useState([]);
+
+
+
+    useEffect(() => {
+        console.log('Interview so far:', interviewData);
+      }, [interviewData]);
+      
+
+
+    
+
+   useEffect(() => {
+        socket.on("video_analysis", (data) => {
+            setCurrentMetrics(curr => [
+                ...curr,
+                {
+                  timestamp: Date.now(),
+                  attention: data.attention_score,
+                  gaze:      data.gaze_direction,
+                  emotion:   data.emotion,
+                }
+              ]);
+            setVideoSrc(`data:image/jpeg;base64,${data.image}`);
+            setAttentionScore(data.attention_score);
+            setLookingAway(data.looking_away);
+            setGazeDirection(data.gaze_direction);
+            setEmotion(data.emotion);
+        });
+
+        return () => socket.off("video_analysis");
+    }, []);
+    
+    const startVideoStream = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { frameRate: { ideal: 15, max: 20 } }});
+            videoRef.current.srcObject = stream;
+
+            const canvas = canvasRef.current;
+            const context = canvas.getContext("2d");
+            const video = videoRef.current;
+
+            let frameCount = 0; // ✅ Track frames to skip processing some
+            setInterval(() => {
+                frameCount++;
+                if (frameCount % 3 !== 0) return;  // ✅ Process only every 3rd frame
+            
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const frame = canvas.toDataURL("image/jpeg");
+                const base64Image = frame.split(",")[1];
+            
+                socket.emit("video_frame", { image: base64Image });
+            }, 150);
+
+        } catch (error) {
+            console.error("❌ Error accessing webcam:", error);
+        }
+    };
+// at top, next to apiRequest…
+async function downloadReport() {
+  const payload = { company: selectedCompany, role: selectedRole, interviewData };
+  const res = await fetch(`${API_BASE_URL}/api/generate_report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to generate report");
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Interview_Report.pdf';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
+  
+
     const scrollToBottom = useCallback(() => {
         if (chatWindowRef.current) {
             chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
@@ -26,9 +125,90 @@ function Chatbot() {
     }, []);
 
     const updateConversation = useCallback((message, isUser) => {
-        setConversation(prevConversation => [...prevConversation, { text: message, user: isUser }]);
-        setTimeout(scrollToBottom, 100);
+        return new Promise((resolve) => {
+            setConversation(prevConversation => [...prevConversation, { text: message, user: isUser }]);
+            if (!isUser && avatarRef.current) {
+                avatarRef.current.speak({ text: message, task_type: TaskType.TALK, taskMode: TaskMode.SYNC });
+                avatarRef.current.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
+            setTimeout(scrollToBottom, 100);
+        });
     }, [scrollToBottom]);
+
+    async function speakWithAvatarChunks(text) {
+        const avatar = avatarRef.current;
+        const sentences = text.match(/[^\.\!\?]+[\.\!\?]*/g) || [text];
+        for (let s of sentences) {
+          const chunk = s.trim();
+          if (!chunk) continue;
+          try {
+            await avatar.speak({ text: chunk, task_type: TaskType.TALK, taskMode: TaskMode.SYNC });
+          } catch (err) {
+            console.error('Avatar speak error:', err);
+            break;
+          }
+          // wait for stop talking event
+          await new Promise(res => avatar.on(StreamingEvents.AVATAR_STOP_TALKING, res));
+          // short pause
+          await new Promise(res => setTimeout(res, 600));
+        }
+      }
+      const speakWithAvatar = async (text) => {
+        if (!avatarRef.current) return;
+        await avatarRef.current.speak({
+          text,
+          task_type: TaskType.TALK,
+          taskMode: TaskMode.SYNC
+        });
+      };
+      
+// Initialize HeyGen avatar session
+    async function initAvatarSession() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/heygen_token`);
+      const { token } = await res.json();
+      const avatar = new StreamingAvatar({ token });
+      avatarRef.current = avatar;
+      avatar.on(StreamingEvents.STREAM_READY, e => {
+        if (avatarVideoRef.current) {
+          avatarVideoRef.current.srcObject = e.detail;
+          avatarVideoRef.current.play().catch(console.error);
+        }
+      });
+      avatar.on(StreamingEvents.AVATAR_START_TALKING, () => {
+        // optionally disable recording while avatar speaks
+        setRecording(false);
+      });
+      await avatar.createStartAvatar({
+        quality: AvatarQuality.Low,
+        avatarName: 'Pedro_Chair_Sitting_public',
+        voice: { voiceId: '42d598350e7a4d339a3875eb1b0169fd', rate: 1.0 },
+        language: 'en'
+      });
+    } catch (err) {
+      console.error('initAvatarSession error:', err);
+    }
+  }
+  const endAvatarSession = async () => {
+    try {
+      if (avatarRef.current) {
+        await avatarRef.current.stop();  // Ends the session on Heygen
+        avatarRef.current = null;
+      }
+      if (avatarVideoRef.current && avatarVideoRef.current.srcObject) {
+        const tracks = avatarVideoRef.current.srcObject.getTracks();
+        tracks.forEach(track => track.stop());  // Stop video stream
+        avatarVideoRef.current.srcObject = null;
+      }
+    } catch (err) {
+      console.error('Error ending avatar session:', err);
+    }
+  };
+  
 
     useEffect(() => {
         const fetchCompanies = async () => {
@@ -70,16 +250,23 @@ function Chatbot() {
     }, [selectedCompany]);
 
     useEffect(() => {
-        if (interviewStarted && currentQuestionIndex < questions.length) {
-            if (!isFollowUp) {
-                updateConversation(questions[currentQuestionIndex], false);
+        const deliverQuestion = async () => {
+            if (interviewStarted && currentQuestionIndex < questions.length && !isFollowUp) {
+                await updateConversation(questions[currentQuestionIndex], false);
+                startRecording(); // ✅ Start only after avatar finishes
+            } else if (interviewStarted && currentQuestionIndex >= questions.length) {
+                await updateConversation("Thank you for your time. I hope this preparation helps you in your interview. Good luck!", false);
+                setInterviewStarted(false);
+                downloadReport();
+                setTimeout(() => {
+                    endAvatarSession();
+                }, 1000);
             }
-        } else if (interviewStarted && currentQuestionIndex >= questions.length) {
-            updateConversation("Thank you for your time. I hope this preparation helps you in your interview. Good luck!", false);
-            setInterviewStarted(false);
-        }
+        };
+    
+        deliverQuestion();
     }, [currentQuestionIndex, questions, interviewStarted, isFollowUp, updateConversation]);
-
+    
     const handleCompanyChange = (event) => {
         setSelectedCompany(event.target.value);
         setSelectedRole('');
@@ -212,6 +399,12 @@ function Chatbot() {
 
   const processAudio = async (audioBlob) => {
     updateConversation('Processing audio...', false);
+    if (audioBlob.size === 0) {
+        console.error("Empty audio blob, skipping recognition.");
+        updateConversation("Could not record audio. Please try again.", false);
+        return;
+    }
+    
 
     try {
         const formData = new FormData();
@@ -238,39 +431,55 @@ function Chatbot() {
 };
 
 const handleAnswer = async (answer) => {
-        const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = questions[currentQuestionIndex];
+  
+    // 1) record this Q→A
+    setInterviewData(d => [
+      ...d,
+      { question: currentQuestion, answer,
+        metrics: currentMetrics 
+       }
+    ]);
+    setCurrentMetrics([]);
 
-        try {
-            const analysis = await apiRequest('/api/analyze', { question: currentQuestion, answer });
-            updateConversation(analysis.analysis, false);
-
-            const suggestions = await apiRequest('/api/suggestions', { question: currentQuestion, answer });
-            updateConversation("Suggestions: " + suggestions.suggestions.join('\n'), false);
-
-            if (!isFollowUp) {
-                const followUp = await apiRequest('/api/followup', { question: currentQuestion, answer });
-                updateConversation(followUp.followup, false);
-                setIsFollowUp(true);
-            } else {
-                setIsFollowUp(false);
-                setCurrentQuestionIndex(prevIndex => prevIndex + 1);
-            }
-        } catch (error) {
-            console.error('Error processing answer:', error);
-            updateConversation('Error processing answer. Please try again.', false);
-        }
-    };
-
-const handleFollowUpAnswer = async (followUpAnswer) => {
     try {
-        await handleAnswer(followUpAnswer);
-        setWaitingForFollowUp(false);
-        setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      // 2) get a friendly reply
+      const { reply } = await apiRequest('/api/friendly_response', { answer });
+      await updateConversation(reply, false);
+  
+      // 3) then follow-up
+      if (!isFollowUp) {
+        const { followup } = await apiRequest('/api/followup', { question: currentQuestion, answer });
+        // record followUp Q
+        setInterviewData(d => {
+          const last = d[d.length - 1];
+          return [
+            ...d.slice(0, -1),
+            { ...last, followUpQuestion: followup }
+          ];
+        });
+        await updateConversation(followup, false);
+        setIsFollowUp(true);
+      } else {
+        // record the follow-up answer
+        setInterviewData(d => {
+          const last = d[d.length - 1];
+          return [
+            ...d.slice(0, -1),
+            { ...last, followUpAnswer: answer,
+                followUpMetrics: currentMetrics
+             }
+          ];
+        });
+        setIsFollowUp(false);
+        setCurrentQuestionIndex(i => i + 1);
+      }
     } catch (error) {
-        console.error('Error processing follow-up answer:', error);
-        updateConversation('Error processing follow-up answer. Please try again.', false);
+      console.error('Error processing answer:', error);
+      updateConversation('Error processing answer. Please try again.', false);
     }
-};
+  };
+  
 
 const handleStart = async () => {
     if (!selectedCompany || !selectedRole) {
@@ -285,13 +494,18 @@ const handleStart = async () => {
             alert(data.error);
             return;
         }
+        await initAvatarSession();
+        //updateConversation(data.greeting, false);
+        await speakWithAvatar(data.greeting);
 
         setQuestions(data.questions);
-        updateConversation(data.summary, false);
         setInterviewStarted(true);
+        startVideoStream();
         setCurrentQuestionIndex(0);
         setIsFollowUp(false);
         //updateConversation(data.questions[0], false);
+        
+        
     } catch (error) {
         console.error('Error starting the interview:', error);
         updateConversation('Error starting the interview. Please try again.', false);
@@ -301,24 +515,40 @@ const handleStart = async () => {
 return (
     <div className="chatbot-container">
         <h1>PrepAI Interview Simulator</h1>
-        <div className="chat-window" ref={chatWindowRef}>
-            {conversation.map((msg, index) => (
-                <div key={index} className={`message ${msg.user ? 'user-message' : 'ai-message'}`}>
-                    <strong>{msg.user ? 'You:' : 'Interviewer:'}</strong>
-                    <p>{msg.text}</p>
-                </div>
-            ))}
-        </div>
+
+        {/* 🔹 Chat & Video Analysis SIDE BY SIDE */}
+        <div className="chat-interface">
+      {/* AI avatar */}
+      <div className="avatar-container">
+        <video
+          ref={avatarVideoRef}
+          className="avatar-video"
+          autoPlay
+          playsInline
+        />
+      </div>
+
+      {/* User camera */}
+      <div className="video-analysis-container">
+        <h2>Your Camera</h2>
+        <video
+          ref={videoRef}
+          className="video-analysis"
+          autoPlay
+          muted
+        />
+        <canvas ref={canvasRef} width="640" height="480" style={{ display: 'none' }} />
+
+      </div>
+    </div>
+
+        {/* 🔹 Controls Section */}
         <div className="controls">
             {!interviewStarted ? (
                 <>
                     <div className="dropdown-group">
                         <label htmlFor="companySelect">Select Company:</label>
-                        <select
-                            id="companySelect"
-                            value={selectedCompany}
-                            onChange={handleCompanyChange}
-                        >
+                        <select id="companySelect" value={selectedCompany} onChange={handleCompanyChange}>
                             <option value="">Select</option>
                             {companies.map((company) => (
                                 <option key={company} value={company}>{company}</option>
@@ -327,11 +557,7 @@ return (
                     </div>
                     <div className="dropdown-group">
                         <label htmlFor="roleSelect">Select Job Role:</label>
-                        <select
-                            id="roleSelect"
-                            value={selectedRole}
-                            onChange={handleRoleChange}
-                        >
+                        <select id="roleSelect" value={selectedRole} onChange={handleRoleChange}>
                             <option value="">Select</option>
                             {roles.map((role) => (
                                 <option key={role} value={role}>{role}</option>
@@ -342,22 +568,23 @@ return (
                 </>
             ) : (
                 <div className="recording-controls">
-                    <button onClick={startRecording} disabled={recording}>
-                        Start Recording
-                    </button>
-                    <button onClick={stopRecording} disabled={!recording}>
-                        Stop Recording
-                    </button>
+                    <button onClick={startRecording} disabled={recording}>Start Recording</button>
+                    <button onClick={stopRecording} disabled={!recording}>Stop Recording</button>
                     {recording && <span className="recording-indicator">Recording...</span>}
+                    <button onClick={downloadReport}>
+                     Download Interview Report PDF 
+                    </button>
                 </div>
             )}
         </div>
+
+        {/* 🔹 Instructions Section */}
         {!interviewStarted && (
             <div className="instructions">
                 <h2>Instructions:</h2>
                 <ol>
                     <li>Select a company and job role from the dropdowns.</li>
-                    <li>Click 'Start Interview' to begin the simulation.</li>
+                    <li>Click 'Start Interview' to begin the simulation (also starts video analysis).</li>
                     <li>Read the interviewer's question carefully.</li>
                     <li>Click 'Start Recording' and speak your answer.</li>
                     <li>Click 'Stop Recording' when you've finished speaking.</li>
@@ -369,6 +596,8 @@ return (
         )}
     </div>
 );
+
+
 }
 
 export default Chatbot;
